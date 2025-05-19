@@ -2,6 +2,7 @@ import React from "react";
 
 import Signup from "./components/Signup";
 import SearchBar from "./components/Search bar";
+import Login from "./components/login";
 
 function App(){
   return(
@@ -9,7 +10,11 @@ function App(){
        
     <div>
       <Signup/>
-   
+         
+     </div>
+     
+     <div>
+      <Login/>
      </div>
 
 
