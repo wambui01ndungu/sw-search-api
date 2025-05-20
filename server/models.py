@@ -24,6 +24,16 @@ class User(db.Model,SerializerMixin):
     def check_password(self, password):
         return check_password_hash(self.password)
 
+    def serialize(self):
+      return{
+        "id":self.id,
+        "firstname":self.firstname,
+        "surname":self.surname,
+        "email":self.email,
+        "password:"self.password,
+      }
+    
+
 
        
 
@@ -34,5 +44,13 @@ class SearchCache(db.Model, SerializerMixin):
     timestamp = db.Column(db.DateTime, default = datetime.utcnow)
     search_term = db.Column(db.String, nullable=False)
     results = db.Column(JSON, nullable=False)
+
+    def serialize(self):
+      return{
+        "id":self.id,
+        "timestamp":self.timestamp,
+        "search_term":self.search_term,
+        "results":self.results
+      }
 
 
