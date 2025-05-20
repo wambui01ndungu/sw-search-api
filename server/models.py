@@ -2,6 +2,7 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime 
 from sqlalchemy_serializer import SerializerMixin
 from sqlalchemy.dialects.postgresql import JSON
+from werkzeug.security import generate_password_hash, chek_password_hashgt
 
 db =SQLAlchemy()
 
@@ -13,7 +14,15 @@ class User(db.Model,SerializerMixin):
     surname =db.Column(db.String, nullable=False)
     email =db.Column(db.String(234), unique=True, nullable=False)
     password_has =db.Column(db.String(128), nullable=False)
-    
+
+    #set password
+    def set_password(self, raw_password):
+        self.password = generate_password_hash( raw_password)
+
+
+    #check password
+    def check_password(self, password):
+        return check_password_hash(self.password)
 
 
        
