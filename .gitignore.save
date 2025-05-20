@@ -1,0 +1,15 @@
+node_modu# Ignore node_modules and cache files
+client/node_modules/
+# Ignore node_modules and cache files
+client/node_modules/
+# Ignore node_modules and cache files
+client/node_modules/
+
+
+les/
+.env
+__pycache__/
+*.pyc
+instance/
+.mypy_cache/
+.venv/
