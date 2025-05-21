@@ -4,14 +4,11 @@ function Login(){
   const [loginData, setLoginData] = useState({email:"", password:""})
 
   const handleChange=(e)=>{
-    const[name,value]= e.target;
-    setLoginData((prev)=>({
-      ...prev,
-      [name]:value
-
-    }));
+    setLoginData({
+      ...loginData,
+      [e.target.name]:e.target.value
+    });
   };
- 
     
 
 const handleSubmit=(e)=>{

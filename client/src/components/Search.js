@@ -1,27 +1,40 @@
 import React, { useEffect, useState } from "react"
 function Search(){
-  const [results, setResults] = useState ([]);
+  //const [results, setResults] = useState ([]);
+  const[query, setQuery]=useState("");
+  const[ suggestions, setSuggestions]= useState([]);
 
 const handleChange=(e)=>{
-  const{key, value}=e.target;
-  setResults((prev)=>({
-    ...prev,
-    [key]:value
-
-  }));
-
+  setQuery(e.target.value);
 };
+  
 
-const fechData=async()=>{
-  const res= await fetch(URL)
-  const data = await res.json()
-console.log(data)
-}
-
-
+// send data to the backend
 useEffect(()=>{
-  fechData();
-},[]);
+  if(!query){
+    setSuggestions([]);
+    return;
+  }
+  const delayBounce=setTimeout(()=>{
+  if(query.length > 1){
+    fetch (`https://swapi.py4e.com/api/people/?search=${query}`)
+    
+    .then((res)=>res.json())
+    .then((data)=>{
+      setSuggestions(data.results || []);
+    })
+    .catch((err)=> console.error("error fetching suggestions", err));
+  }
+
+  else {
+  setSuggestions([]);
+  }
+  },300);
+  return () => clearTimeout (delayBounce);
+},[query]);
+
+  
+ 
 
 return(
   <div>
@@ -30,10 +43,20 @@ return(
       <input
       type="text"
       placeholder="search..."
-      value={results.key}
+      value={query}
       onChange={handleChange}
       /> 
     </form>
+    
+{/*drop down suggestions*/}
+
+    {suggestions.length >0 && (
+      <ul className="Suggestion_List">
+        {suggestions.map((item, idx)=>(
+          <li key ={idx}>{item.name}</li>
+        ))}
+      </ul>
+    )}
 
   </div>
 );

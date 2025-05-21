@@ -1,8 +1,9 @@
 import React from "react";
 
 import Signup from "./components/Signup";
-import SearchBar from "./components/Search bar";
+import Search from "./components/Search";
 import Login from "./components/login";
+import "./App.css";
 
 function App(){
   return(
@@ -15,6 +16,9 @@ function App(){
      
      <div>
       <Login/>
+     </div>
+     <div>
+      <Search/>
      </div>
 
 
