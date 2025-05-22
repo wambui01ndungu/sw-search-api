@@ -1,4 +1,6 @@
 import React, { useState } from "react"
+import { Link } from "react-router-dom";
+
 
 
 function Signup () {
@@ -80,6 +82,11 @@ const handleChange=(e)=>{
 
         
       </form>
+      <div  className= "siginup_footer">
+        <p> <Link to ="/login"> Login</Link>
+        </p>
+
+      </div>
     </div>
    
     
