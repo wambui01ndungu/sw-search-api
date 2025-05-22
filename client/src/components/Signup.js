@@ -82,7 +82,7 @@ const handleChange=(e)=>{
 
         
       </form>
-      <div  className= "siginup_footer">
+      <div  className= "signup_footer">
         <p> <Link to ="/login"> Login</Link>
         </p>
 
