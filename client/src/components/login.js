@@ -1,5 +1,5 @@
 import React, {useState, useEffect}from "react";
-import {link, useNavigate} from"react-router-dom";
+import {Router, link, useNavigate} from"react-router-dom";
 
 function Login(){
   const [loginData, setLoginData] = useState({
@@ -45,6 +45,10 @@ function Login(){
 
         localStorage.setItem("token", data.access_token);
         localStorage.setItem("username", data.name || "User");
+        
+        //navigation Route
+
+        navigate("/Search");
     
   
       }catch (error) {
