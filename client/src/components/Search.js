@@ -9,8 +9,22 @@ const handleChange=(e)=>{
   setQuery(e.target.value);
 };
   
+/*const token = localStorage.getItem("token");
 
-// send data to the backend
+fetch("http://localhost:3005/search", {
+  method: "GET",
+  headers: {
+    "Authorization": `Bearer ${token}`
+  }
+})
+.then(res => res.json())
+.then(data => {
+  console.log(data);
+})
+.catch(err => {
+  console.error("Unauthorized or error:", err);
+})
+*/// send data to the backend
 useEffect(()=>{
   if(!query){
     setSuggestions([]);
