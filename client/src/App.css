@@ -202,8 +202,7 @@ body {
 }
 
 .search-icon {
-  size: 5px;
-  font-size: 24px;
+ font-size: 24px;
   color: #007bff;
   cursor: pointer;
   transition: color 0.2s ease;

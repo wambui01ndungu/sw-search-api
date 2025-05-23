@@ -48,6 +48,15 @@ useEffect(()=>{
   return () => clearTimeout (delayBounce);
 },[query]);
 
+const handleSuggestionClick=(suggestion)=>{
+  setQuery(suggestion.name);
+  setSuggestions([]);
+  
+}
+const handleSearchClick=()=>{
+  delayBounces();
+ 
+};
   
  
 
@@ -62,15 +71,21 @@ return(
       /> 
       <FaSearch
       className="search-icon"
-      onMouseClick={Search}
+      onClick={handleSearchClick}
   />
     
 {/*drop down suggestions*/}
 
     {suggestions.length >0 && (
       <ul className="Suggestion_List">
-        {suggestions.map((item, idx)=>(
-          <li key ={idx}>{item.name}</li>
+        {suggestions.map((suggestion, idx)=>(
+          <li 
+          key ={idx}
+          onClick={()=>handleSuggestionClick(suggestion)}
+          style={{cursor:"pointer"}}
+          
+          >
+            {suggestion.name}</li>
         ))}
       </ul>
     )}
