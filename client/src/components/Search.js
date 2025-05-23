@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react"
+import { FaSearch } from 'react-icons/fa';
 function Search(){
   //const [results, setResults] = useState ([]);
   const[query, setQuery]=useState("");
@@ -37,16 +38,18 @@ useEffect(()=>{
  
 
 return(
-  <div>
-    <h2> search</h2>
-    <form >
+  <div className= "search-container">
+     
       <input
       type="text"
       placeholder="search..."
       value={query}
       onChange={handleChange}
       /> 
-    </form>
+      <FaSearch
+      className="search-icon"
+      onMouseClick={Search}
+  />
     
 {/*drop down suggestions*/}
 

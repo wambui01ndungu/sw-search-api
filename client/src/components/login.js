@@ -1,5 +1,7 @@
-import React, {useState, useEffect}from "react";
-import {Router, link, useNavigate} from"react-router-dom";
+import React, {useState, useEffect, useContext}from "react";
+import {Router, Link, useNavigate} from"react-router-dom";
+
+
 
 function Login(){
   const [loginData, setLoginData] = useState({
@@ -10,9 +12,11 @@ function Login(){
 
   const[error, setError]= useState("");
   const navigate = useNavigate();
+ 
   const API_BASE_URL = process.env.REACT_APP_API_URL;
 
-  
+  console.log("API URL:", API_BASE_URL);
+
   const handleChange=(e)=>{
     setLoginData({
       ...loginData,
@@ -21,16 +25,15 @@ function Login(){
   };
     
 
-
   const handleSubmit= async (e)=>{
     e.preventDefault();
-    setError();
+    setError("");
   
     try {
         const response = await fetch(`${API_BASE_URL}/login`,{
           method:"POST",
           headers: {
-            'Content_Type':'application.json'
+            'Content-Type':'application/json'
              },
              body:JSON.stringify({
               email:loginData.email,
@@ -62,27 +65,35 @@ function Login(){
 
 
 return(
-  <div>
-    <h2> Login</h2>
+  <div className="login-container">
+    <div className="login-card" ><h2> Login</h2>
     <form onSubmit={handleSubmit}>
+      <div>
+      <label>Email</label>
       <input
         name="email"
-        placeholder="email"
+        placeholder=""
         value={loginData.email}
         onChange={handleChange}
       />
-
+     </div> 
+     <div>  
+      <label>Password</label>
       <input
         name="password"
-        placeholder="password"
+        placeholder=""
         type="password"
         value={loginData.password}
         onChange={handleChange}
       />
-      <button>submit</button>
+      </div>
 
+      
+       <button>submit</button>
+     
 
     </form>
+    </div>
   </div>
  );
 };

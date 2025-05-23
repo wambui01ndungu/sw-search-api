@@ -13,6 +13,7 @@ function Signup () {
     
 
   })
+  const API_BASE_URL = "http://localhost:3005";
 
  // const validate form =() =>{
 
@@ -27,11 +28,34 @@ const handleChange=(e)=>{
 };
 
 //prevent reloading by default
-  const handleSubmit =(e) =>{
+  const handleSubmit =async(e) =>{
     e.preventDefault();
-    console.log(formData)
+   
+    try {
+      const response =  await fetch(`${API_BASE_URL}/signup`,{
+      method:'POST',
+      headers:{
+        "Content-Type":"application/json"
+      },
+      body:JSON.stringify(formData)
+    
+    });
 
+    const data = await response.json();
+
+    if (response.ok){
+      alert("signup sucessful!");
+    } else{
+      alert("signup failed:"+ (data.message || 'unknown error'));
+    }
   }
+    catch (error){
+      alert("something went wrong!")
+
+
+    }
+
+  };
 
   return(
   <div className= "signup-container">
@@ -83,7 +107,7 @@ const handleChange=(e)=>{
         
       </form>
       <div  className= "signup_footer">
-        <p> <Link to ="/login"> Login</Link>
+        <p> <Link to ="/login"> Login?</Link>
         </p>
 
       </div>
