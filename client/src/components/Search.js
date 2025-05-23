@@ -4,12 +4,13 @@ function Search(){
   //const [results, setResults] = useState ([]);
   const[query, setQuery]=useState("");
   const[ suggestions, setSuggestions]= useState([]);
+  const[selectedPerson , setSelectedPerson]=useState(null)
 
 const handleChange=(e)=>{
   setQuery(e.target.value);
 };
   
-/*const token = localStorage.getItem("token");
+const token = localStorage.getItem("token");
 
 fetch("http://localhost:3005/search", {
   method: "GET",
@@ -24,7 +25,8 @@ fetch("http://localhost:3005/search", {
 .catch(err => {
   console.error("Unauthorized or error:", err);
 })
-*/// send data to the backend
+
+// send data to the backend
 useEffect(()=>{
   if(!query){
     setSuggestions([]);
@@ -51,10 +53,23 @@ useEffect(()=>{
 const handleSuggestionClick=(suggestion)=>{
   setQuery(suggestion.name);
   setSuggestions([]);
+  setSelectedPerson(suggestion);
   
-}
+};
+
 const handleSearchClick=()=>{
-  delayBounces();
+  fetch(`https://swapi.py4e.com/api/people/?search=${query}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.results && data.results.length > 0) {
+          setSelectedPerson(data.results[0]); // show the first matching person
+        } else {
+          setSelectedPerson(null);
+          alert("No match found");
+        }
+      })
+      .catch((err) => console.error("Error on search click", err));
+  
  
 };
   
@@ -89,6 +104,48 @@ return(
         ))}
       </ul>
     )}
+    {/*selected person data*/}
+    {selectedPerson && (
+  <table border="1" style={{ marginTop: "20px", borderCollapse: "collapse", width:"50%" }}>
+    <tbody>
+      <tr>
+        <th>name</th>
+        <td>{selectedPerson.name}</td>
+      </tr>
+      <tr>
+        <th>height</th>
+        <td>{selectedPerson.height}</td>
+      </tr>
+      <tr>
+        <th>Mass</th>
+        <td>{selectedPerson.mass}</td>
+      </tr>
+      <tr>
+        <th>hair color</th>
+        <td>{selectedPerson.hair_color}</td>
+      </tr>
+      <tr>
+        <th>skin color</th>
+        <td>{selectedPerson.skin_color}</td>
+      </tr>
+      <tr>
+        <th>eye color</th>
+        <td>{selectedPerson.eye_color}</td>
+      </tr>
+      
+      <tr>
+        <th>birth Year</th>
+        <td>{selectedPerson.birth_year}</td>
+      </tr>
+      <tr>
+        <th>gender</th>
+        <td>{selectedPerson.gender}</td>
+      </tr>
+
+    </tbody>
+  </table>
+)}
+
 
   </div>
 );
