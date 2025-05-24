@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react"
 import { FaSearch } from 'react-icons/fa';
+import ResultBox from "./Result";
 function Search(){
   //const [results, setResults] = useState ([]);
   const[query, setQuery]=useState("");
@@ -7,12 +8,25 @@ function Search(){
   const[selectedPerson , setSelectedPerson]=useState(null)
 
 const handleChange=(e)=>{
-  setQuery(e.target.value);
+  const newQuery=e.target.value;
+  setQuery(newQuery);
+  setSelectedPerson(null);
+
+  if (newQuery.trim()!==""){
+    fetch(`http://localhost:3006/api/search?query=${newQuery}`)
+    .then((res) => res.json())
+    .then((data) => {
+      setSuggestions(data.results); 
+    });
+    
+  } else{
+    setSuggestions([]);
+  }
 };
   
 const token = localStorage.getItem("token");
 
-fetch("http://localhost:3005/search", {
+fetch("http://localhost:3006/search", {
   method: "GET",
   headers: {
     "Authorization": `Bearer ${token}`
@@ -104,48 +118,8 @@ return(
         ))}
       </ul>
     )}
-    {/*selected person data*/}
-    {selectedPerson && (
-  <table border="1" style={{ marginTop: "20px", borderCollapse: "collapse", width:"50%" }}>
-    <tbody>
-      <tr>
-        <th>name</th>
-        <td>{selectedPerson.name}</td>
-      </tr>
-      <tr>
-        <th>height</th>
-        <td>{selectedPerson.height}</td>
-      </tr>
-      <tr>
-        <th>Mass</th>
-        <td>{selectedPerson.mass}</td>
-      </tr>
-      <tr>
-        <th>hair color</th>
-        <td>{selectedPerson.hair_color}</td>
-      </tr>
-      <tr>
-        <th>skin color</th>
-        <td>{selectedPerson.skin_color}</td>
-      </tr>
-      <tr>
-        <th>eye color</th>
-        <td>{selectedPerson.eye_color}</td>
-      </tr>
-      
-      <tr>
-        <th>birth Year</th>
-        <td>{selectedPerson.birth_year}</td>
-      </tr>
-      <tr>
-        <th>gender</th>
-        <td>{selectedPerson.gender}</td>
-      </tr>
-
-    </tbody>
-  </table>
-)}
-
+    <ResultBox person={selectedPerson}/>
+    
 
   </div>
 );

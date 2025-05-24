@@ -13,7 +13,7 @@ function Signup () {
     
 
   })
-  const API_BASE_URL = "http://localhost:3005";
+  const API_BASE_URL = "http://localhost:3006";
 
  // const validate form =() =>{
 

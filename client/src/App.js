@@ -7,6 +7,7 @@ import Login from "./components/login";
 import "./App.css";
 
 
+
 function App(){
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
@@ -17,6 +18,7 @@ function App(){
         <Route path="/" element ={<Signup/>}/>
         <Route path="/login" element ={<Login/>}/>
         <Route path="/search" element ={<Search/>}/>
+        
 
       </Routes>
 
