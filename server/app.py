@@ -12,14 +12,17 @@ import traceback
 import requests
 from flask_restful import Api, Resource
 from models import db, User, SearchCache
-
+from extensions import bcrypt
 from flask_jwt_extended import JWTManager, create_access_token, get_jwt_identity, jwt_required
 
 load_dotenv()
 app = Flask(__name__)
 
 #enable cors for front end
-CORS(app, resources ={r"/.*":{"origins":"http://localhost:3000"}}, supports_credentials=True)
+CORS(app, resources ={r"/.*":{"origins":"http://localhost:3000"}},
+    supports_credentials=True ,
+    allow_headers=["Content-Type", "Authorization"],
+    methods=["GET", "POST",  "OPTIONS"])
 
 
 #database configuration
@@ -32,6 +35,7 @@ app.json.compact =False
 
 
 #initialize extentions
+
 db.init_app(app)
 migrate = Migrate(app, db)
 api=Api(app)
@@ -65,6 +69,8 @@ class  UserSignup(Resource):
               firstname=data['firstname'],
               surname=data['surname'],
               email=data['email'],
+              password_hash=generate_password_hash(data['password'])
+
             )
 
             #hash password before saving
@@ -82,45 +88,48 @@ class  UserSignup(Resource):
                 },201
       except Exception as e:
           traceback.print_exc() 
-          return {"error":"signup failed", "details":str(e)},500 
+          return {"error":"server failed", "details":str(e)},500 
 
 
 class UserLogin(Resource):
     def post(self):
-        data= request.get_json()
-        if not data or 'email' not in data or 'password' not in data:
-            return {"message": "Missing email or password"}, 400
-        user= User.query.filter_by(email=data['email']).first()
+      try:
+          data= request.get_json()
+          if not data or 'email' not in data or 'password' not in data:
+              return {"message": "Missing email or password"}, 400
+          user= User.query.filter_by(email=data['email']).first()
       
 
 
-       #check if the user exists and the password is correct
-        if user and user.checkpassword(data['password']):
-            access_token = create_access_token(identity=user.id)
+          #check if the user exists and the password is correct
+          if user and user.check_password(data['password']):
+              access_token = create_access_token(identity=user.id)
 
-            #create a session
+             #create a session
          
 
-            return{
-             "access_token":access_token,
-             "user":{
-                 "id":user.id,
-                 "firstname":user.firstname,
-                 "surname":user.surname,
-                 'email':user.email
+              return{
+                  "access_token":access_token,
+                  "user":{
+                  "id":user.id,
+                  "firstname":user.firstname,
+                  "surname":user.surname,
+                  'email':user.email
              }
-        }
-        else: 
-            return {"message":"invalid credentials"}, 401
-    
+          }
+          else: 
+              return {"message":"invalid credentials"}, 401
+      except Exception as e:
+            traceback.print_exc()
+            return {"error": "Server error", "details": str(e)}, 500    
 
 
 
 #memory catche structure
 cache={}
-CACHE_DURATION=15*60
+CACHE_DURATION = 15 * 60
 
-#search endpionts
+  #search endpionts
 class SearchResource(Resource):
     @jwt_required()
     def get (self):
