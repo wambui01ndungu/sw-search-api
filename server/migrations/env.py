@@ -47,7 +47,7 @@ target_db = current_app.extensions['migrate'].db
 
 def get_metadata():
     if hasattr(target_db, 'metadatas'):
-        return target_db.metadatas[None]
+        return target_db.metadatas[db.metadata]
     return target_db.metadata
 
 
@@ -96,7 +96,7 @@ def run_migrations_online():
 
     connectable = get_engine()
 
-    with connectable.connect() as connection:
+    with connectable.connect() as connection:get_metadata
         context.configure(
             connection=connection,
             target_metadata=get_metadata(),
