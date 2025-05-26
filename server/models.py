@@ -2,7 +2,7 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime 
 from sqlalchemy_serializer import SerializerMixin
 from sqlalchemy.dialects.postgresql import JSON
-from werkzeug.security import generate_password_hash, check_password_hash
+
 from extensions import bcrypt
 db =SQLAlchemy()
 

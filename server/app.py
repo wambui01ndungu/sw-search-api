@@ -17,6 +17,7 @@ from flask_jwt_extended import JWTManager, create_access_token, get_jwt_identity
 
 load_dotenv()
 app = Flask(__name__)
+bcrypt.init_app(app)
 
 #enable cors for front end
 CORS(app, resources ={r"/.*":{"origins":"http://localhost:3000"}},
@@ -69,7 +70,7 @@ class  UserSignup(Resource):
               firstname=data['firstname'],
               surname=data['surname'],
               email=data['email'],
-              password_hash=generate_password_hash(data['password'])
+              
 
             )
 
@@ -95,6 +96,8 @@ class UserLogin(Resource):
     def post(self):
       try:
           data= request.get_json()
+          print("incoming login data:", data)
+          
           if not data or 'email' not in data or 'password' not in data:
               return {"message": "Missing email or password"}, 400
           user= User.query.filter_by(email=data['email']).first()
@@ -143,9 +146,10 @@ class SearchResource(Resource):
       if query in cache:
         data,timestamp =cache[query]
         if current_time - timestamp < CACHE_DURATION:
-          return jsonify({
+          return({
             "source":"cache",
-            "results":data}),200
+            "results":data
+            }),200
         else:
           #expired
           del  cache[query]
@@ -160,13 +164,13 @@ class SearchResource(Resource):
         #cache results
         cache[query]=(data,current_time)
 
-        return jsonify({
+        return ({
           "source":"swapi",    
           "results":data
         }),200
       
       except requests.RequestException as e:
-          return jsonify({
+          return ({
             "error":"failed to feach data from SWAPI", 
              "details":str(e)}),500
 
