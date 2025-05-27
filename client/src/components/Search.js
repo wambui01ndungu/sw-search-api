@@ -24,11 +24,12 @@ const handleChange=(e)=>{
   }
 };
   
-const token = localStorage.getItem("token");
+const token = localStorage.getItem("access_token");
 
-fetch("http://localhost:3006/search", {
+fetch(`http://localhost:3006/search?query=${query}`, {
   method: "GET",
   headers: {
+    "Content-Type":"application/json",
     "Authorization": `Bearer ${token}`
   }
 })
@@ -43,12 +44,13 @@ fetch("http://localhost:3006/search", {
 // send data to the backend
 useEffect(()=>{
   if(!query){
+    console.error("No suggestions found in localStorage");
     setSuggestions([]);
     return;
   }
   const delayBounce=setTimeout(()=>{
   if(query.length > 1){
-    fetch (`https://swapi.py4e.com/api/people/?search=${query}`)
+    fetch (`https://swapi.py4e.com/api/people/?searchresource=${query}`)
     
     .then((res)=>res.json())
     .then((data)=>{
@@ -72,7 +74,7 @@ const handleSuggestionClick=(suggestion)=>{
 };
 
 const handleSearchClick=()=>{
-  fetch(`https://swapi.py4e.com/api/people/?search=${query}`)
+  fetch(`https://swapi.py4e.com/api/people/?searchresouce=${query}`)
       .then((res) => res.json())
       .then((data) => {
         if (data.results && data.results.length > 0) {

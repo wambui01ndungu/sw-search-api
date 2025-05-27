@@ -1,19 +1,22 @@
 import React, { useState } from "react"
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 
 
 function Signup () {
+  const navigate = useNavigate();
+  const [error, setError]= useState("");
   const [formData, setFormData]= useState({
-    firstName:"",
+    firstname:"",
     surname:"",
     email:"",
     password:"",
-    loginOption:""
+    
     
 
   })
   const API_BASE_URL = "http://localhost:3006";
+  
 
  // const validate form =() =>{
 
@@ -37,23 +40,33 @@ const handleChange=(e)=>{
       headers:{
         "Content-Type":"application/json"
       },
+      credentials:"include",
       body:JSON.stringify(formData)
     
     });
 
     const data = await response.json();
 
-    if (response.ok){
-      alert("signup sucessful!");
+    console.log("Raw response:", response);
+    console.log("Parsed data:", data);  
+
+
+    if (response.ok && data.token){
+      console.log ("signup sucessful!");
+
+      //redirect to log in
+      navigate("/login");
+
     } else{
-      alert("signup failed:"+ (data.message || 'unknown error'));
+      console.warn( "signup failed:", data.message);
+      setError(data.message);
+      alert("user already exist")
     }
   }
-    catch (error){
-      alert("something went wrong!")
-
-
-    }
+  catch (error)  {
+  console.error("Unexpected error during signup:", error);
+  alert("An expected error occured. see console for details");
+  }
 
   };
 
@@ -66,8 +79,8 @@ const handleChange=(e)=>{
           <label>First Name</label>
             <input
               type="text"
-              name="firstName"
-              value={formData.firstName}
+              name="firstname"
+              value={formData.firstname}
               onChange={handleChange}
             />
         </div>

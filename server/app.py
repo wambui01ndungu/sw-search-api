@@ -8,6 +8,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from datetime import datetime
 import traceback
+import time
 
 import requests
 from flask_restful import Api, Resource
@@ -136,7 +137,7 @@ CACHE_DURATION = 15 * 60
 class SearchResource(Resource):
     @jwt_required()
     def get (self):
-      query= request.args.get('query')
+      query= request.args.get('query',"").strip().lower()
       if not query:
         return jsonify({"error":"'query' cannot be found"}),400
       current_time = datetime.now().timestamp()
@@ -144,15 +145,17 @@ class SearchResource(Resource):
 
       #check cache
       if query in cache:
-        data,timestamp =cache[query]
-        if current_time - timestamp < CACHE_DURATION:
-          return({
-            "source":"cache",
-            "results":data
-            }),200
-        else:
-          #expired
-          del  cache[query]
+          data,timestamp =cache[query]
+          if current_time - timestamp < CACHE_DURATION:
+              print("serving from cache")
+              return({
+              "source":"cache",
+              "results":data
+               }),200
+          else:
+              #expired
+              del  cache[query]
+      print("feching from SWAPI")
 
 
         #fectch from SWAPI if it's expired or not cached
@@ -162,7 +165,11 @@ class SearchResource(Resource):
         data =response.json().get("results",[])
 
         #cache results
-        cache[query]=(data,current_time)
+        
+
+        sorted_results = sorted(data, key=lambda person: person['name'].lower())
+        cache[query]=(sorted_data,current_time)
+        
 
         return ({
           "source":"swapi",    

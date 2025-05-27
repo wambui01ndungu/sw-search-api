@@ -1,5 +1,5 @@
-import React, {useState, useEffect, useContext}from "react";
-import {Router, Link, useNavigate} from"react-router-dom";
+import React, {useState,}from "react";
+import { useNavigate} from"react-router-dom";
 
 
 
@@ -13,9 +13,8 @@ function Login(){
   const[error, setError]= useState("");
   const navigate = useNavigate();
  
-  const API_BASE_URL = process.env.REACT_APP_API_URL;
-
-  console.log("API URL:", API_BASE_URL);
+ 
+  const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:3006";
 
   const handleChange=(e)=>{
     setLoginData({
@@ -36,26 +35,33 @@ function Login(){
             'Content-Type':'application/json'
              },
              body:JSON.stringify({
+
               email:loginData.email,
                password:loginData.password
               })
         });
-        const data = await response.json();
+       
 
         if(!response.ok){
-          throw new Error(data.message ||"login failed")
+          const data = await response.json();
+          throw new Error(data.message ||"login failed");
         }
+        const data = await response.json();
 
         localStorage.setItem("token", data.access_token);
         localStorage.setItem("username", data.name || "User");
+
+        
         
         //navigation Route
 
         navigate("/Search");
+        alert("Login successful!")
     
   
       }catch (error) {
         console.error("Error logging in:", error.message);
+        setError(error.message);
       }
     };
 
