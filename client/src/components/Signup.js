@@ -15,7 +15,7 @@ function Signup () {
     
 
   })
-  const API_BASE_URL = "http://localhost:3006";
+  const API_URL = process.env.REACT_APP_API_URL;
   
 
  // const validate form =() =>{
@@ -35,7 +35,7 @@ const handleChange=(e)=>{
     e.preventDefault();
    
     try {
-      const response =  await fetch(`${API_BASE_URL}/signup`,{
+      const response =  await fetch(`${API_URL}/signup`,{
       method:'POST',
       headers:{
         "Content-Type":"application/json"

@@ -13,7 +13,7 @@ const handleChange=(e)=>{
   setSelectedPerson(null);
 
   if (newQuery.trim()!==""){
-    fetch(`http://localhost:3006/api/search?query=${newQuery}`)
+    fetch(`${API_URL}/api/search?query=${newQuery}`)
     .then((res) => res.json())
     .then((data) => {
       setSuggestions(data.results); 
@@ -25,8 +25,9 @@ const handleChange=(e)=>{
 };
   
 const token = localStorage.getItem("access_token");
+const API_URL = process.env.REACT_APP_API_URL;
 
-fetch(`http://localhost:3006/search?query=${query}`, {
+fetch(`${API_URL}/search?query=${query}`, {
   method: "GET",
   headers: {
     "Content-Type":"application/json",

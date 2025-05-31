@@ -14,7 +14,7 @@ function Login(){
   const navigate = useNavigate();
  
  
-  const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:3006";
+ 
 
   const handleChange=(e)=>{
     setLoginData({
@@ -26,10 +26,15 @@ function Login(){
 
   const handleSubmit= async (e)=>{
     e.preventDefault();
+
+    const API_URL = process.env.REACT_APP_API_URL 
+
+    console.log("API_URL:", API_URL);
+
     setError("");
   
     try {
-        const response = await fetch(`${API_BASE_URL}/login`,{
+        const response = await fetch(`${API_URL}/login`,{
           method:"POST",
           headers: {
             'Content-Type':'application/json'
@@ -56,7 +61,7 @@ function Login(){
         //navigation Route
 
         navigate("/Search");
-        alert("Login successful!")
+       // alert("Login successful!")
     
   
       }catch (error) {
