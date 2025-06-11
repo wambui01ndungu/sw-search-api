@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 
@@ -18,7 +18,32 @@ function Signup () {
   const API_URL = process.env.REACT_APP_API_URL;
   
 
- // const validate form =() =>{
+ const validateForm =() =>{
+    const { firstname, surname, email, password} = formData;
+    if (!firstname.trim() || !surname.trim() || !email.trim() || !password.trim()){
+    setError("All fields are required.");
+    return false;
+   }
+
+  //email regex
+    const emailRegex = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+    if (!emailRegex.test(email)){
+      setError("Please enter a valid email adress.");
+      return false;
+    }
+
+  //password
+    const passwordRegex = /^(?=.*[A-z])(?=.*\d).{8,}$/;
+    if (!passwordRegex.test(password)){
+      setError('Pasword must be atleast 8 characters, include uppercase, lowercase and a number.');
+        return false;
+      
+    }
+  //Pass
+    setError("");
+    return true;
+
+ };
 
 //update state
 const handleChange=(e)=>{
@@ -33,7 +58,12 @@ const handleChange=(e)=>{
 //prevent reloading by default
   const handleSubmit =async(e) =>{
     e.preventDefault();
+    
+    //validate before sending to server
    
+    if(!validateForm()) return;
+
+
     try {
       const response =  await fetch(`${API_URL}/signup`,{
       method:'POST',
@@ -59,7 +89,7 @@ const handleChange=(e)=>{
 
     } else{
       console.warn( "signup failed:", data.message);
-      setError(data.message);
+      setError(data.message || "Signup failed");
       alert("user already exist")
     }
   }
@@ -113,6 +143,7 @@ const handleChange=(e)=>{
           onChange={handleChange}
 
           />
+        {error && <p style={{ color: "red" }}>{error}</p>}  
         </div>
         
         <button type="submit">submit</button>
