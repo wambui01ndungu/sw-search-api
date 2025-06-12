@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { validateForm } from "./validation";
 
 
 
@@ -18,33 +19,7 @@ function Signup () {
   const API_URL = process.env.REACT_APP_API_URL;
   
 
- const validateForm =() =>{
-    const { firstname, surname, email, password} = formData;
-    if (!firstname.trim() || !surname.trim() || !email.trim() || !password.trim()){
-    setError("All fields are required.");
-    return false;
-   }
-
-  //email regex
-    const emailRegex = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
-    if (!emailRegex.test(email)){
-      setError("Please enter a valid email adress.");
-      return false;
-    }
-
-  //password
-    const passwordRegex = /^(?=.*[A-z])(?=.*\d).{8,}$/;
-    if (!passwordRegex.test(password)){
-      setError('Pasword must be atleast 8 characters, include uppercase, lowercase and a number.');
-        return false;
-      
-    }
-  //Pass
-    setError("");
-    return true;
-
- };
-
+ 
 //update state
 const handleChange=(e)=>{
   const{name, value} = e.target;
@@ -58,11 +33,15 @@ const handleChange=(e)=>{
 //prevent reloading by default
   const handleSubmit =async(e) =>{
     e.preventDefault();
-    
-    //validate before sending to server
-   
-    if(!validateForm()) return;
 
+  //validate before sending to server 
+  const{valid, message}= validateForm(formData)
+    
+   
+    if(!valid){
+     setError(message);
+     return;
+    };
 
     try {
       const response =  await fetch(`${API_URL}/signup`,{

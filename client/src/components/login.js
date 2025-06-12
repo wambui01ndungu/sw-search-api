@@ -1,5 +1,6 @@
 import React, {useState,}from "react";
 import { useNavigate} from"react-router-dom";
+import {validateForm} from "./validation"
 
 
 
@@ -26,6 +27,20 @@ function Login(){
 
   const handleSubmit= async (e)=>{
     e.preventDefault();
+
+    setError("");
+
+    //validate inputs
+  const { valid, message } = validateForm(loginData);
+    if (!valid) {
+      setError(message);
+      return;
+    }
+    
+
+
+
+
 
     const API_URL = process.env.REACT_APP_API_URL 
 
