@@ -1,10 +1,11 @@
+#models.py
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime 
 from sqlalchemy_serializer import SerializerMixin
 from sqlalchemy.dialects.postgresql import JSON
 
-from extensions import bcrypt
-db =SQLAlchemy()
+
+from extensions import bcrypt, db
 
 class User(db.Model,SerializerMixin):
     __tablename__='users'
@@ -12,10 +13,11 @@ class User(db.Model,SerializerMixin):
     id =db.Column(db.Integer, primary_key=True)
     firstname =db.Column(db.String, nullable=False)
     surname =db.Column(db.String, nullable=False)
-    email =db.Column(db.String(234), unique=True, nullable=False)
+    email =db.Column(db.String(100), unique=True, nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
 
     #set password
+    serialize_rules =('-password_hash',)
     def set_password(self, raw_password):
         self.password_hash = bcrypt.generate_password_hash( raw_password).decode('utf8')
 
@@ -23,16 +25,6 @@ class User(db.Model,SerializerMixin):
     #check password
     def check_password(self, password):
         return bcrypt.check_password_hash(self.password_hash, password)
-
-    def serialize(self):
-      return{
-        "id":self.id,
-        "firstname":self.firstname,
-        "surname":self.surname,
-        "email":self.email,
-        
-      }
-    
 
 
        
@@ -44,14 +36,8 @@ class SearchCache(db.Model, SerializerMixin):
     timestamp = db.Column(db.DateTime, default = datetime.utcnow)
     search_term = db.Column(db.String, nullable=False)
     results = db.Column(JSON, nullable=False)
-    use_id= db.Column(db.Integer, db.ForeignKey('users.id'))
-
-    def serialize(self):
-      return{
-        "id":self.id,
-        "timestamp":self.timestamp,
-        "search_term":self.search_term,
-        "results":self.results
-      }
+    user_id= db.Column(db.Integer, db.ForeignKey('users.id'))
+    user =db.relationship("User", backref="searches")
+  
 
 

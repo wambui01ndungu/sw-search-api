@@ -1,191 +1,99 @@
 import os
-import jwt
+from flask import Flask, jsonify, request, make_response
 from flask_cors import CORS
-from dotenv import load_dotenv
-from flask import Flask, jsonify, request, session
-from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
-from datetime import datetime
-import traceback
-import time
+from flask_restful import Api
+from dotenv import load_dotenv
+from flask_jwt_extended import JWTManager
+import flask_jwt_extended as jwt_ext
 
-import requests
-from flask_restful import Api, Resource
-from models import db, User, SearchCache
-from extensions import bcrypt
-from flask_jwt_extended import JWTManager, create_access_token, get_jwt_identity, jwt_required
+from extensions import db, bcrypt
+from auth import auth_bp
+from search import search_bp
+from utils import decode_token_with_multiple_keys, error_response, log_internal_error
+from cache import  load_cache_from_db
+import logging 
 
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO) 
 load_dotenv()
-app = Flask(__name__)
-bcrypt.init_app(app)
 
-#enable cors for front end
-CORS(app, resources ={r"/.*":{"origins":"http://localhost:3000"}},
-    supports_credentials=True ,
-    allow_headers=["Content-Type", "Authorization"],
-    methods=["GET", "POST",  "OPTIONS"])
+def create_app():
+    app = Flask(__name__)
 
+    env = os.getenv("FLASK_ENV", "development")
+    if env == "production":
+        app.config.from_object('config.ProductionConfig')
+    else:
+        app.config.from_object('config.DevelopmentConfig')
 
-#database configuration
-app.config['SQLALCHEMY_DATABASE_URI'] =os.environ.get("DATABASE_URI")
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS']=False
-app.config['JWT_SECRET_KEY']= os.environ.get('SECRET_KEY', 'dev_fallback_secret')
-app.secret_key= os.environ.get('SECRET_KEY', 'dev_fallback_secret')
-jwt=JWTManager(app)
-app.json.compact =False
+    bcrypt.init_app(app)
 
-
-#initialize extentions
-
-db.init_app(app)
-migrate = Migrate(app, db)
-api=Api(app)
+    #enable cors for frontend
+    CORS(app,
+        supports_credentials =True,
+        #resources={r"/api/*":{"origins": os.environment.get("Frontend_url", "http://localhost:3000")}}
+        origins=["http://localhost:3000"],    
+        allow_headers=["Content-Type", "Authorization"],
+        methods=["GET", "POST",  "OPTIONS"])
 
 
-@app.route("/")
-def index():
-  return"This is my Sc-search Api"
+    
+    #JWT condig
+    current_jwt_key = os.environ.get("JWT_SECRET_KEY_CURRENT", "dev_fallback_jwt")
+    old_jwt_key = os.environ.get("JWT_OLD_SECRET_KEY")
+    app.config['JWT_SECRET_KEYS'] = [k for k in [old_jwt_key, current_jwt_key] if k]
+    
+
+    
+     # JWT Setup   
+    jwt_keys = app.config['JWT_SECRET_KEYS']
+    jwt_ext.decode_token = decode_token_with_multiple_keys(jwt_keys)
+     
+     #initialize extentions
+
+    db.init_app(app)
+    migrate = Migrate(app, db)
+    jwt=JWTManager(app)
+    api=Api(app)
+    
+    #register blueprints
+    app.register_blueprint(auth_bp, url_prefix="/auth")
+    app.register_blueprint(search_bp, url_prefix="/search")
 
 
-#authentication 
-class  UserSignup(Resource):
-    def post(self):
-      try:
-          data = request.get_json()
-          print("Incoming signup data:", data)
+    @app.route("/")
+    def index():
+        return"This is my Sc-search Api"
 
-          if not data:
-              return {"message": "No data provided"}, 400
+    @app.before_request
+    def handle_options_request():
+        if request.method =="OPTIONS":
+            return make_response("", 200)
+    
+    @app.errorhandler(Exception)
+    def handle_exception(e):
+        logger.error(f"[global] Exception type:{type(e)}, value:{e}")
 
-          required_fields = ['firstname', 'surname', 'email', 'password']
-          if not all(field in data for field in required_fields):
-              return {"message": "Missing required fields"}, 400  
+        from flask import Response
+        if isinstance (e, Response):
+            return e
+        return error_response("server_error","An internal server error occorred",500)
 
-          #check if user already exists
-          if User.query.filter_by(email=data['email']).first():
-            return{"message":" User already exist"}
-          else:
-            # sign up if not a user
-            new_user =User(
-              firstname=data['firstname'],
-              surname=data['surname'],
-              email=data['email'],
-              
-
-            )
-
-            #hash password before saving
-            new_user.set_password(data['password'])
-            
-            db.session.add(new_user)
-            db.session.commit()
-            access_token = create_access_token(identity=new_user.id)
-        
-            return{
-                "message":"user registered sucessfully!",
-                "token": access_token,
-                "email":new_user.email
-
-                },201
-      except Exception as e:
-          traceback.print_exc() 
-          return {"error":"server failed", "details":str(e)},500 
-
-
-class UserLogin(Resource):
-    def post(self):
-      try:
-          data= request.get_json()
-          print("incoming login data:", data)
-          
-          if not data or 'email' not in data or 'password' not in data:
-              return {"message": "Missing email or password"}, 400
-          user= User.query.filter_by(email=data['email']).first()
       
-
-
-          #check if the user exists and the password is correct
-          if user and user.check_password(data['password']):
-              access_token = create_access_token(identity=user.id)
-
-             #create a session
-         
-
-              return{
-                  "access_token":access_token,
-                  "user":{
-                  "id":user.id,
-                  "firstname":user.firstname,
-                  "surname":user.surname,
-                  'email':user.email
-             }
-          }
-          else: 
-              return {"message":"invalid credentials"}, 401
-      except Exception as e:
-            traceback.print_exc()
-            return {"error": "Server error", "details": str(e)}, 500    
+    return app
 
 
 
-#memory catche structure
-cache={}
-CACHE_DURATION = 15 * 60
 
-  #search endpionts
-class SearchResource(Resource):
-    @jwt_required()
-    def get (self):
-      query= request.args.get('query',"").strip().lower()
-      if not query:
-        return jsonify({"error":"'query' cannot be found"}),400
-      current_time = datetime.now().timestamp()
-
-
-      #check cache
-      if query in cache:
-          data,timestamp =cache[query]
-          if current_time - timestamp < CACHE_DURATION:
-              print("serving from cache")
-              return({
-              "source":"cache",
-              "results":data
-               }),200
-          else:
-              #expired
-              del  cache[query]
-      print("feching from SWAPI")
-
-
-        #fectch from SWAPI if it's expired or not cached
-      try:
-        response=requests.get(f"https://swapi.dev/api/people/?search={query}")
-        response.raise_for_status()
-        data =response.json().get("results",[])
-
-        #cache results
-        
-
-        sorted_results = sorted(data, key=lambda person: person['name'].lower())
-        cache[query]=(sorted_data,current_time)
-        
-
-        return ({
-          "source":"swapi",    
-          "results":data
-        }),200
-      
-      except requests.RequestException as e:
-          return ({
-            "error":"failed to feach data from SWAPI", 
-             "details":str(e)}),500
-
-#add routes to API
-api.add_resource(UserSignup,'/signup')
-api.add_resource(UserLogin,'/login')
-api.add_resource(SearchResource,'/search')
 
 
 if __name__== "__main__":
-  app.run(debug=True, port =3006)
+    app = create_app()
+    with app.app_context():
+        load_cache_from_db()
+
+    app.run(debug=True, port =3006)
+
+
