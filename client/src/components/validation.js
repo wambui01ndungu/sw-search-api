@@ -5,28 +5,29 @@ export const validateForm =(formData) =>{
     return{ valid:false, message:"Missing data"}
   }
   const { firstname, surname, email, password} = formData;
-  if (!email.trim() || !password.trim()){
+
+  if (!email?.trim() || !password?.trim()){ 
     return {valid: false, message:"Email and password required"};
  
  }
  //signup validation 
   if (
-    ("firstname" in formData && !firstname.trim()) || 
-    ("surname" in formData && !surname.trim())
+    ("firstname" in formData && !firstname?.trim()) || 
+    ("surname" in formData && !surname?.trim())
  ){
-  return{valid: false, message:"All fields are required."};
+  return{valid: false, message:"First name and surname are required."};
   }
 
 //email regex
   const emailRegex = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
-  if (!emailRegex.test(email)){
-   return{valid: false, message:"Please enter a valid email adress."};
+  if (!emailRegex.test(formData.email.trim())){
+   return{valid: false, message:"Please enter a valid email format."};
     
   }
 
 //password
-  const passwordRegex = /^(?=.*[A-z])(?=.*\d).{8,}$/;
-  if (!passwordRegex.test(password)){
+  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+  if (!passwordRegex.test(password.trim())){
      return{valid: false, 
       message:
       'Pasword must be atleast 8 characters, include uppercase, lowercase and a number.'};

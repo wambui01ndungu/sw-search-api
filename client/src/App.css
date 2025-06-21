@@ -248,3 +248,10 @@ body {
 .character-table tr:nth-child(even) {
   background-color: #f9f9f9;
 }
+.error {
+  color: red;
+  background-color: #ffe6e6;
+  padding: 8px;
+  border-radius: 4px;
+  margin-bottom: 10px;
+}

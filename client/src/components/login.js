@@ -38,10 +38,6 @@ function Login(){
     }
     
 
-
-
-
-
     const API_URL = process.env.REACT_APP_API_URL 
 
     console.log("API_URL:", API_URL);
@@ -49,7 +45,8 @@ function Login(){
     setError("");
   
     try {
-        const response = await fetch(`${API_URL}/login`,{
+      console.log("sending login request with:", loginData);
+        const response = await fetch(`${API_URL}/auth/login`,{
           method:"POST",
           headers: {
             'Content-Type':'application/json'
@@ -60,25 +57,25 @@ function Login(){
                password:loginData.password
               })
         });
+        console.log("login responce status:", response.status)
        
+        const data = await response.json();
+        console.log("login responce datae:", data);
 
         if(!response.ok){
-          const data = await response.json();
+          
           throw new Error(data.message ||"login failed");
         }
-        const data = await response.json();
-
-        localStorage.setItem("token", data.access_token);
+        
+       
         localStorage.setItem("username", data.name || "User");
 
-        
-        
+               
         //navigation Route
 
-        navigate("/Search");
+        navigate("/search");
        // alert("Login successful!")
     
-  
       }catch (error) {
         console.error("Error logging in:", error.message);
         setError(error.message);
@@ -95,8 +92,9 @@ return(
     <div className="login-card" ><h2> Login</h2>
     <form onSubmit={handleSubmit}>
       <div>
-      <label>Email</label>
+      <label htmlFor="email">Email</label>
       <input
+        id ="email"
         name="email"
         placeholder=""
         value={loginData.email}
@@ -104,8 +102,9 @@ return(
       />
      </div> 
      <div>  
-      <label>Password</label>
+      <label htmlFor="">Password</label>
       <input
+        id="password"
         name="password"
         placeholder=""
         type="password"
@@ -115,7 +114,7 @@ return(
       </div>
 
       
-       <button>submit</button>
+       <button>login</button>
      
 
     </form>

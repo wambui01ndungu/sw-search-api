@@ -1,96 +1,163 @@
 import React, { useEffect, useState } from "react";
 import { FaSearch } from 'react-icons/fa';
 import ResultBox from "./Result";
+import { redirectDocument } from "react-router-dom";
 function Search(){
   //const [results, setResults] = useState ([]);
   const[query, setQuery]=useState("");
+  const [loading, setLoading] =useState(false);
   const[ suggestions, setSuggestions]= useState([]);
+  const [error, setError]=useState(null)
   const[selectedPerson , setSelectedPerson]=useState(null)
+  const [token , setToken]= useState(()=> localStorage.getItem("access_token"));
+  const[loadingMessage, setLoadingMessage]= useState("");
+  const API_URL = process.env.REACT_APP_API_URL;
+  console.log("API_URL:", API_URL);
 
-const handleChange=(e)=>{
-  const newQuery=e.target.value;
+  
+
+const handleChange = (e) =>{
+  const newQuery = e.target.value;
   setQuery(newQuery);
   setSelectedPerson(null);
-
-  if (newQuery.trim()!==""){
-    fetch(`${API_URL}/api/search?query=${newQuery}`)
-    .then((res) => res.json())
-    .then((data) => {
-      setSuggestions(data.results); 
-    });
-    
-  } else{
-    setSuggestions([]);
-  }
-};
-  
-const token = localStorage.getItem("access_token");
-const API_URL = process.env.REACT_APP_API_URL;
-
-fetch(`${API_URL}/search?query=${query}`, {
-  method: "GET",
-  headers: {
-    "Content-Type":"application/json",
-    "Authorization": `Bearer ${token}`
-  }
-})
-.then(res => res.json())
-.then(data => {
-  console.log(data);
-})
-.catch(err => {
-  console.error("Unauthorized or error:", err);
-})
-
-// send data to the backend
-useEffect(()=>{
-  if(!query){
-    console.error("No suggestions found in localStorage");
-    setSuggestions([]);
-    return;
-  }
-  const delayBounce=setTimeout(()=>{
-  if(query.length > 1){
-    fetch (`https://swapi.py4e.com/api/people/?searchresource=${query}`)
-    
-    .then((res)=>res.json())
-    .then((data)=>{
-      setSuggestions(data.results || []);
-    })
-    .catch((err)=> console.error("error fetching suggestions", err));
-  }
-
-  else {
-  setSuggestions([]);
-  }
-  },300);
-  return () => clearTimeout (delayBounce);
-},[query]);
+  setError(null);
+  };
 
 const handleSuggestionClick=(suggestion)=>{
-  setQuery(suggestion.name);
-  setSuggestions([]);
-  setSelectedPerson(suggestion);
-  
-};
+    setQuery(suggestion.name);
+    setSuggestions([]);
+    setSelectedPerson(suggestion);
+    
+  };
 
-const handleSearchClick=()=>{
-  fetch(`https://swapi.py4e.com/api/people/?searchresouce=${query}`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.results && data.results.length > 0) {
-          setSelectedPerson(data.results[0]); // show the first matching person
-        } else {
-          setSelectedPerson(null);
-          alert("No match found");
-        }
-      })
-      .catch((err) => console.error("Error on search click", err));
-  
+
+const fetchFromBackend = async(query) => {
+  const storedToken = localStorage.getItem("access_token");
  
-};
   
- 
+  //check cache
+  const cacheKey =`suggestions_${query.toLowerCase()}`;
+  const cached = localStorage.getItem(cacheKey);
+  if (cached){
+    try{
+      return JSON.parse(cached);
+    }catch (err){
+      console.error("Failed to parse cached data", err);
+    }
+
+  }
+
+  if(!query.trim() || !storedToken) {
+    console.warn("missing query or token",{query, token:storedToken});
+    return null;}
+
+  try{
+      const res= await fetch(`${API_URL}/search?query=${query}`,{
+        method:"GET",
+        headers:{
+          "Content-Type":"application/json",
+        
+        },
+        credentials:"include"
+
+      });
+      if (!res.ok){
+        const errorData = await res.json();
+        console.error("Backend error", errorData);
+        return null;
+      }
+
+      const data = await res.json();
+      const results= data.results || [];
+
+      //catche the results
+      localStorage.setItem(cacheKey, JSON.stringify(results));
+      return results;
+      
+    } catch(err){
+      console.error("error feching from backend",err);
+      return null;
+    }
+
+
+  };
+
+const handleSearchClick= async ()=>{
+  setLoading(true);
+  setLoadingMessage("Searching...")
+
+  const results = await fetchFromBackend(query);
+
+  setLoading(false);
+  setLoadingMessage("");
+
+  if (results && results.length > 0) {
+    setSelectedPerson(results[0]); // show the first matching person
+  } else {
+    setSelectedPerson(null);
+    alert("No match found");
+  }
+      
+  };
+  
+  //sync token from local storage
+useEffect(()=>{
+  
+    const storedToken = localStorage.getItem("access_token");
+    if(!storedToken){
+      console.warn("Token not found in local st")
+    }
+   
+      setToken(storedToken);
+    
+
+},[]);
+
+
+
+//Debounce suggestions from backend
+useEffect(()=>{ 
+
+    if(!token || query.length <=1){
+      console.warn('debounce skipped due to missing token or short query', {query, token});
+      setSuggestions([]);
+      setLoading(false);
+      setLoadingMessage("")
+      return;
+    }
+    const delayBounce=setTimeout(async()=> {
+      setLoading(true);
+      setLoadingMessage("Searching Suggestions...");
+      console.log("Debounced suggestion fetch for query:", query);
+    try{
+
+      const results = await fetchFromBackend(query);
+      setLoading(false);
+      
+      if (results)  {
+        setSuggestions(results);
+             setError(null); 
+      } else{
+        setSuggestions([]);
+        setError("could not fetch suggestions.");
+      }}
+      catch (err){
+        console.error("Debaounce fetch error", err);
+        setSuggestions([]);
+        setError("Error during suggestion fetch")
+      }finally{
+        setTimeout(()=>{
+          setLoading(false);
+          setLoadingMessage("")
+        },500);
+      }
+
+      }, 300);
+      
+    return () => clearTimeout (delayBounce);
+},   [query, token]);
+
+
 
 return(
   <div className= "search-container">
@@ -101,11 +168,13 @@ return(
       value={query}
       onChange={handleChange}
       /> 
+      {loadingMessage && <div style ={{color:"grey", fontSize:"0.8rem", marginTop:"4px",fontStyle:"italic"}}> {loadingMessage}</div>}
       <FaSearch
       className="search-icon"
       onClick={handleSearchClick}
   />
-    
+    {error && 
+    (<p style={{color:"red", fontSize:"0.8 rem", marginTop:"5px"}}>{error}</p>)}
 {/*drop down suggestions*/}
 
     {suggestions.length >0 && (

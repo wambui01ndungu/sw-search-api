@@ -1,12 +1,15 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { validateForm } from "./validation";
+import { FaTruckLoading } from "react-icons/fa";
+import { signup } from "./authService";
 
 
 
 function Signup () {
   const navigate = useNavigate();
   const [error, setError]= useState("");
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData]= useState({
     firstname:"",
     surname:"",
@@ -29,52 +32,45 @@ const handleChange=(e)=>{
   }));
 
 };
+const formatName =(name) =>
+  name ? name.trim().charAt(0).toUpperCase()+name.trim().slice(1).toLowerCase():"";
 
 //prevent reloading by default
   const handleSubmit =async(e) =>{
     e.preventDefault();
-
-  //validate before sending to server 
-  const{valid, message}= validateForm(formData)
     
-   
+
+  const normalizedFormData = {
+      firstname: formatName(formData.firstname),
+      surname: formatName(formData.surname),
+      email: formData.email.trim().toLowerCase(),
+      password: formData.password,
+};
+  //validate before sending to server 
+  const{valid, message}= validateForm(normalizedFormData);
     if(!valid){
-     setError(message);
-     return;
+      setError(message);
+      return;
     };
 
+     setLoading(true);
+     setError("");
+   
+
     try {
-      const response =  await fetch(`${API_URL}/signup`,{
-      method:'POST',
-      headers:{
-        "Content-Type":"application/json"
-      },
-      credentials:"include",
-      body:JSON.stringify(formData)
-    
-    });
+      const data =await signup(normalizedFormData);
+      console.log("signup  sucessfull", data)
 
-    const data = await response.json();
-
-    console.log("Raw response:", response);
-    console.log("Parsed data:", data);  
-
-
-    if (response.ok && data.token){
-      console.log ("signup sucessful!");
-
-      //redirect to log in
-      navigate("/login");
-
-    } else{
-      console.warn( "signup failed:", data.message);
-      setError(data.message || "Signup failed");
-      alert("user already exist")
-    }
+      localStorage.setItem("user", JSON.stringify(data.email));
+      navigate("/login")
   }
+
+
   catch (error)  {
   console.error("Unexpected error during signup:", error);
-  alert("An expected error occured. see console for details");
+  setError("A network error occurred. Please try again.");
+  } finally{
+    setLoading(false);
   }
 
   };
@@ -84,48 +80,59 @@ const handleChange=(e)=>{
     <div className="signup-form-container">
       <h2> Signup</h2>
       <form onSubmit={handleSubmit}>
+        {error && <div className="error" >{error}</div>}
         <div>
-          <label>First Name</label>
+          <label htmlFor="firstName">firstName</label>
             <input
+              id="firstname"
               type="text"
               name="firstname"
               value={formData.firstname}
               onChange={handleChange}
+              disabled={loading}
             />
         </div>
         <div>
-          <label>Surname</label>
+          <label htmlFor="surname">Surname</label>
           <input
+          id="surname"
           type= "text"
           name="surname"
           value={formData.surname}
           onChange={handleChange}
+          disabled={loading}
 
           />
         </div>
         <div>
-          <label>Email</label>
+          <label htmlFor="email">Email</label>
           <input
+          id="email"
           type="text"
           name="email"
           value={formData.email}
           onChange={handleChange}
+          disabled={loading}
+
 
           />
         </div>
         <div>
-          <label>Password</label>
+          <label htmlFor=" password">Password</label>
           <input
-          type="text"
+          id="password"
+          type="password"
           name="password"
           value={formData.password}
           onChange={handleChange}
+          disabled={loading}
+
 
           />
-        {error && <p style={{ color: "red" }}>{error}</p>}  
+         
         </div>
         
-        <button type="submit">submit</button>
+        <button type="submit" disabled={loading}>{loading ? <><FaTruckLoading/>Signing up ...</>:"signup"} </button>
 
         
       </form>
