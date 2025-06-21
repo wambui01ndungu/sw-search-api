@@ -33,8 +33,7 @@ def create_app():
     #enable cors for frontend
     CORS(app,
         supports_credentials =True,
-        #resources={r"/api/*":{"origins": os.environment.get("Frontend_url", "http://localhost:3000")}}
-        origins=["http://localhost:3000"],    
+        resources={r"/api/*":{"origins": os.environ.get("Frontend_url", "http://localhost:3000")}},
         allow_headers=["Content-Type", "Authorization"],
         methods=["GET", "POST",  "OPTIONS"])
 
@@ -94,6 +93,7 @@ if __name__== "__main__":
     with app.app_context():
         load_cache_from_db()
 
-    app.run(debug=True, port =3006)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host = "0:0:0:0", debug=True, port=port)
 
 
