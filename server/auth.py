@@ -43,8 +43,8 @@ class UserSignup(Resource):
                 return error_response("user_exists", "User already exists"), 409
 
             new_user = User(
-                firstname=data['firstname'],
-                surname=data['surname'],
+                firstname=data['firstname'].strip(),
+                surname=data['surname'].strip(),
                 email= email,
             )
             new_user.set_password(data['password'])

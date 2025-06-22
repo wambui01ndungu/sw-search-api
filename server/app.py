@@ -14,6 +14,7 @@ from search import search_bp
 from utils import decode_token_with_multiple_keys, error_response, log_internal_error
 from cache import  load_cache_from_db
 import logging 
+import traceback
 
  
 load_dotenv()
@@ -107,6 +108,7 @@ if __name__== "__main__":
         load_cache_from_db()
 
     port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", debug=True, port=port)
+    debug_mode =(os.getenv("FLASK_ENV", "development") !="production") 
+    app.run(host="0.0.0.0", debug=debug_mode, port=port)
 
 

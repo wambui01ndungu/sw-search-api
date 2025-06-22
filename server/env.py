@@ -15,19 +15,19 @@ target_metadata = db.metadata
 def run_migrations_online():
     connectable = db.engine
 
-        with connectable.connect() as connection:
-            context.configure(
-                connection=connection,
-                target_metadata=target_metadata,
+    with connectable.connect() as connection:
+        context.configure(
+            connection=connection,
+            target_metadata=target_metadata,
             )
 
 
-            with context.begin_transaction():
+        with context.begin_transaction():
                 context.run_migrations()
 
 if context.is_offline_mode():
     
     pass
 else:
-  with aopp.app_context():
+  with app.app_context():
     run_migrations_online()

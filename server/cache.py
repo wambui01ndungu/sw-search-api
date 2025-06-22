@@ -12,7 +12,7 @@ def load_cache_from_db():
     for entry in all_cache_entries:
         
         try:
-            results = json.loads(entry.results)
+            results = (entry.results)
 
             cache[entry.search_term] = (results, entry.timestamp)
         except Exception as e:

@@ -68,7 +68,7 @@ class SearchResource(Resource):
                 log_internal_error(e,"parse_db_cache")
         else:
             logger.info(f"[Search] DB cache expired for query: '{query}'")
-           ")
+         
         
       else:
           logger.info(f"[Search] No DB cache found for query: '{query}'")
@@ -113,7 +113,7 @@ class SearchResource(Resource):
            }),200
       
       except requests.RequestException as e:
-           logger.error(f"[Search] Failed to fetch from SWAPI for query: '{query}'")
+          logger.error(f"[Search] Failed to fetch from SWAPI for query: '{query}'")
           log_internal_error(e,"fetch_starwars_people")
           return error_response("swapi_error", "failed to fetch data from Starwrs API"),500
 
