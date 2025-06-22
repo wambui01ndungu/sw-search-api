@@ -103,16 +103,12 @@ def create_app():
 
 
 
-
-
-
-if __name__== "__main__":
+if __name__ == "__main__":
     app = create_app()
-    with app.app_context():
-        load_cache_from_db()
 
+   
     port = int(os.environ.get("PORT", 3006))
-    debug_mode =(os.getenv("FLASK_ENV", "development") !="production") 
+    debug_mode = os.getenv("FLASK_ENV", "development") != "production"
     app.run(host="0.0.0.0", debug=debug_mode, port=port)
 
 

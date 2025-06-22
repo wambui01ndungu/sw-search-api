@@ -1,5 +1,3 @@
-#env.py
-
 from __future__ import with_statement
 import logging
 from logging.config import fileConfig
@@ -7,20 +5,21 @@ from logging.config import fileConfig
 from alembic import context
 from sqlalchemy import engine_from_config, pool
 
-# this is the Alembic Config object
+# Alembic Config
 config = context.config
 
 # Logging
 fileConfig(config.config_file_name)
 logger = logging.getLogger('alembic.env')
 
-# Create the Flask app context
-from app import create_app, db  # Adjust if your structure is different
-app = create_app()
-app.app_context().push()
+# Import create_app and db
+from app import create_app, db
 
-# Set the target metadata
-target_metadata = db.metadata
+# Create Flask app instance using factory
+app = create_app()
+
+# Set target metadata for migrations
+target_metadata = db.Model.metadata
 
 
 def run_migrations_offline():
@@ -52,7 +51,9 @@ def run_migrations_online():
             context.run_migrations()
 
 
+# MAIN LOGIC
 if context.is_offline_mode():
     run_migrations_offline()
 else:
-    run_migrations_online()
+    with app.app_context():
+        run_migrations_online()
