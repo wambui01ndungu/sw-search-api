@@ -1,3 +1,4 @@
+//results.js
 import React from "react";
 
 const ResultBox =({person})=>{

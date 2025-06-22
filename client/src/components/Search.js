@@ -1,3 +1,4 @@
+//search.js
 import React, { useEffect, useState } from "react";
 import { FaSearch } from 'react-icons/fa';
 import ResultBox from "./Result";
