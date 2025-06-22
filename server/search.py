@@ -72,8 +72,7 @@ class SearchResource(Resource):
         
       else:
           logger.info(f"[Search] No DB cache found for query: '{query}'")
-        
-
+      
       try:
           logger.info(f"[Search] Fetching from SWAPI for query: '{query}'")
           

@@ -78,6 +78,10 @@ def create_app():
     @app.route("/")
     def index():
         return"This is my Sc-search Api"
+    @app.route('/favicon.ico')
+    def favicon():
+        print("favicon requested")
+        return '', 204  # No   
 
     @app.before_request
     def handle_options_request():
@@ -107,7 +111,7 @@ if __name__== "__main__":
     with app.app_context():
         load_cache_from_db()
 
-    port = int(os.environ.get("PORT", 5000))
+    port = int(os.environ.get("PORT", 3006))
     debug_mode =(os.getenv("FLASK_ENV", "development") !="production") 
     app.run(host="0.0.0.0", debug=debug_mode, port=port)
 
