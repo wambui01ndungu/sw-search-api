@@ -15,7 +15,7 @@ from utils import decode_token_with_multiple_keys, error_response, log_internal_
 from cache import  load_cache_from_db
 import logging 
 import traceback
-
+from app import create_app
  
 load_dotenv()
 logging.basicConfig(
@@ -69,7 +69,7 @@ def create_app():
     migrate = Migrate(app, db)
     jwt=JWTManager(app)
     api=Api(app)
-    
+
     #register blueprints
     app.register_blueprint(auth_bp, url_prefix="/auth")
     app.register_blueprint(search_bp, url_prefix="/search")
