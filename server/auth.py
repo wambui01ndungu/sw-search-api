@@ -7,6 +7,9 @@ from validation import validate_signup_data
 from utils import log_internal_error, error_response
 from flask_jwt_extended import  create_refresh_token, jwt_required, get_jwt_identity
 
+import logging
+
+logger = logging.getLogger(__name__)
 
 auth_bp =Blueprint("auth", __name__)
 api =Api(auth_bp)
@@ -29,7 +32,7 @@ class UserSignup(Resource):
     def post(self):
         try:
             data = request.get_json()
-            print("Incoming signup data:", data)
+            logger.info(f"Incoming signup data: {data}")
 
             is_valid, message = validate_signup_data(data)
             if not is_valid:
@@ -42,7 +45,7 @@ class UserSignup(Resource):
             new_user = User(
                 firstname=data['firstname'],
                 surname=data['surname'],
-                email=data['email'],
+                email= email,
             )
             new_user.set_password(data['password'])
             db.session.add(new_user)
@@ -66,7 +69,8 @@ class UserLogin(Resource):
     def post(self):
         try:
             data = request.get_json()
-            print("Incoming login data:", data)
+            logger.info(f"Incoming login data: {data}") 
+           
 
             if not data or 'email' not in data or 'password' not in data:
                 return error_response("missing_fields", "Email or password are missing"), 400

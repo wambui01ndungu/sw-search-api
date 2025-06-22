@@ -15,9 +15,21 @@ from utils import decode_token_with_multiple_keys, error_response, log_internal_
 from cache import  load_cache_from_db
 import logging 
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO) 
+ 
 load_dotenv()
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s [%(name)s] %(message)s",
+    handlers=[
+        logging.StreamHandler()
+    ]
+)
+
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
+
 
 def create_app():
     app = Flask(__name__)
@@ -33,7 +45,7 @@ def create_app():
     #enable cors for frontend
     CORS(app,
         supports_credentials =True,
-        resources={r"/api/*":{"origins": os.environ.get("Frontend_url", "http://localhost:3000")}},
+        origins=os.environ.get("FRONTEND_URL", "http://localhost:3000").split(","),
         allow_headers=["Content-Type", "Authorization"],
         methods=["GET", "POST",  "OPTIONS"])
 
@@ -74,6 +86,7 @@ def create_app():
     @app.errorhandler(Exception)
     def handle_exception(e):
         logger.error(f"[global] Exception type:{type(e)}, value:{e}")
+        logger.error(traceback.format_exc())
 
         from flask import Response
         if isinstance (e, Response):
@@ -94,6 +107,6 @@ if __name__== "__main__":
         load_cache_from_db()
 
     port = int(os.environ.get("PORT", 5000))
-    app.run(host = "0:0:0:0", debug=True, port=port)
+    app.run(host="0.0.0.0", debug=True, port=port)
 
 

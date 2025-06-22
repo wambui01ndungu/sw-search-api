@@ -3,7 +3,7 @@ import re
 
 def validate_signup_data(data):
     if not isinstance(data, dict):
-        return False, "invalid input format"
+        return False, "invalid input format. Expected JSON objects"
     
     required_fields =('firstname', 'surname', 'email' ,'password')
     if not all(k in data for k in required_fields):

@@ -11,8 +11,9 @@ from cache import cache
 import os
 from service import fetch_starwars_people
 from utils import error_response, log_internal_error
+import logging
 
-
+logger = logging.getLogger(__name__)
 
 #memory catche structure
 
@@ -26,10 +27,12 @@ class SearchResource(Resource):
     def get (self):
       query= request.args.get('query',"").strip().lower()
       if not query:
+          logger.warning("[Search] Missing 'query' parameter in request")
           return error_response("missing query", "'query'parameter is required"),400
       current_time = datetime.utcnow()
       user_id =get_jwt_identity()
-      print("JWT identity (user_id):", user_id)
+      logger.info(f"[Search] Request received for query: '{query}' by user {user_id}")
+
 
 
 
@@ -37,10 +40,10 @@ class SearchResource(Resource):
       if query in cache:
           data,timestamp =cache[query]
           if (current_time - timestamp).total_seconds() < CACHE_DURATION:
-              print("serving from in-memory cache")
+              logger.info(f"[Search] Serving result from memory cache for query: '{query}'")
               return{
-              "source":"cache",
-              "results":data
+                "source":"cache",
+                "results":data
                },200
           else:
               #expired
@@ -54,21 +57,27 @@ class SearchResource(Resource):
             try:
                 parsed_results = db_cache.results
                 cache[query]=(parsed_results, db_cache.timestamp)
-                print("serving from database cache")
+                logger.info(f"[Search] Serving result from DB cache for query: '{query}'")
+              
                 return{
                     "source":"database",
                     "results": parsed_results
                 },200
             except Exception as e:
+                logger.error(f"[Search] Failed to parse DB cache for query: '{query}'")
                 log_internal_error(e,"parse_db_cache")
         else:
-           print("Database cache expired")
+            logger.info(f"[Search] DB cache expired for query: '{query}'")
+           ")
         
       else:
-         print("No db cache found")
+          logger.info(f"[Search] No DB cache found for query: '{query}'")
+        
 
       try:
-          print("fetching from SWAPI")
+          logger.info(f"[Search] Fetching from SWAPI for query: '{query}'")
+          
+        
 
         #cache results
       
@@ -76,12 +85,14 @@ class SearchResource(Resource):
           sorted_results = sorted(results, key=lambda x: x['name'].lower())
         
           cache[query]=(sorted_results,current_time)
+          logger.info(f"[Search] Stored result in memory cache for query: '{query}'")
 
         
           existing_cache = SearchCache.query.filter_by(search_term=query, user_id= user_id).first()
           if existing_cache:
             existing_cache.results = (sorted_results)
             existing_cache.timestamp = datetime.utcnow()
+            logger.info(f"[Search] Updated DB cache for query: '{query}' by user {user_id}")
           else:
               new_cache_entry =SearchCache(
                 search_term=query,
@@ -92,7 +103,7 @@ class SearchResource(Resource):
               db.session.add(new_cache_entry)
           db.session.commit()
        
-          print(f"Cache saved for term '{query}' by user {user_id} at {datetime.utcnow()}")
+          logger.info(f"Cache saved for term '{query}' by user {user_id} at {datetime.utcnow()}")
 
         
 
@@ -102,6 +113,7 @@ class SearchResource(Resource):
            }),200
       
       except requests.RequestException as e:
+           logger.error(f"[Search] Failed to fetch from SWAPI for query: '{query}'")
           log_internal_error(e,"fetch_starwars_people")
           return error_response("swapi_error", "failed to fetch data from Starwrs API"),500
 
