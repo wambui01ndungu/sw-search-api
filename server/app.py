@@ -15,7 +15,7 @@ from utils import decode_token_with_multiple_keys, error_response, log_internal_
 from cache import  load_cache_from_db
 import logging 
 import traceback
-from app import create_app
+
  
 load_dotenv()
 logging.basicConfig(
