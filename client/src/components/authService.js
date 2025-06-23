@@ -38,12 +38,11 @@ export async function login(formData) {
     throw new Error(message);
   }
 
+  if (data.access_token) {
+    localStorage.setItem("access_token", data.access_token);
+  } else {
+    console.warn("No access_token found in response");
+  }
+
   return data;
 }
-if (data.access_token) {
-  localStorage.setItem("access_token", data.access_token);
-} else {
-  console.warn("No access_token found in response");
-}
-
-return data;
