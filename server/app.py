@@ -82,6 +82,11 @@ def create_app():
     def favicon():
         print("favicon requested")
         return '', 204  # No   
+    @app.route('/python-version')
+    def python_version():
+        import sys
+        return {'python_version': sys.version}
+
 
     @app.before_request
     def handle_options_request():
