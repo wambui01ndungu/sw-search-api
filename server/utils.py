@@ -54,7 +54,7 @@ def jwt_required_rotated(fn):
     def wrapper(*args, **kwargs):
         token =request.cookies.get("access_token_cookie")
         if not token:
-            return  error_response({"msg":"missing token"}),401
+            return  error_response({"missing_token", "token is missing"}),401
         try:
             keys =current_app.config["JWT_SECRET_KEYS"]
             decode_jwt_with_rotation(token, keys)
