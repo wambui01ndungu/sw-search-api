@@ -2,7 +2,9 @@
 import React, { useEffect, useState } from "react";
 import { FaSearch } from 'react-icons/fa';
 import ResultBox from "./Result";
-import { redirectDocument } from "react-router-dom";
+
+import BASE_URL from "./config";
+
 function Search(){
   //const [results, setResults] = useState ([]);
   const[query, setQuery]=useState("");
@@ -12,7 +14,7 @@ function Search(){
   const[selectedPerson , setSelectedPerson]=useState(null)
   const [token , setToken]= useState(()=> localStorage.getItem("access_token"));
   const[loadingMessage, setLoadingMessage]= useState("");
-  const API_URL = process.env.REACT_APP_API_URL;
+  const API_URL = BASE_URL;
   console.log("API_URL:", API_URL);
 
   
