@@ -28,7 +28,7 @@ class SearchResource(Resource):
       query= request.args.get('query',"").strip().lower()
       if not query:
           logger.warning("[Search] Missing 'query' parameter in request")
-          return error_response("missing query", "'query'parameter is required"),400
+          return error_response("missing query", "'query'parameter is required")
       current_time = datetime.utcnow()
       user_id =get_jwt_identity()
       logger.info(f"[Search] Request received for query: '{query}' by user {user_id}")
@@ -82,6 +82,10 @@ class SearchResource(Resource):
       
           results = fetch_starwars_people(query)
           sorted_results = sorted(results, key=lambda x: x['name'].lower())
+
+          print("RESULT TYPE:", type(sorted_results))
+          print("RESULT CONTENT:", sorted_results)
+
         
           cache[query]=(sorted_results,current_time)
           logger.info(f"[Search] Stored result in memory cache for query: '{query}'")
@@ -110,11 +114,12 @@ class SearchResource(Resource):
             "source":"swapi",    
             "results":sorted_results
            }),200
+           
       
       except requests.RequestException as e:
           logger.error(f"[Search] Failed to fetch from SWAPI for query: '{query}'")
           log_internal_error(e,"fetch_starwars_people")
-          return error_response("swapi_error", "failed to fetch data from Starwrs API"),500
+          return error_response("swapi_error", "failed to fetch data from Starwrs API")
 
              
 
