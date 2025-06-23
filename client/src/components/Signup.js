@@ -83,7 +83,7 @@ const formatName =(name) =>
       <form onSubmit={handleSubmit}>
         {error && <div className="error" >{error}</div>}
         <div>
-          <label htmlFor="firstName">firstName</label>
+          <label htmlFor="firstName">firstname</label>
             <input
               id="firstname"
               type="text"

@@ -40,3 +40,10 @@ export async function login(formData) {
 
   return data;
 }
+if (data.access_token) {
+  localStorage.setItem("access_token", data.access_token);
+} else {
+  console.warn("No access_token found in response");
+}
+
+return data;
