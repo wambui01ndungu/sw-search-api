@@ -2,7 +2,7 @@
 import React, {useState,}from "react";
 import { useNavigate} from"react-router-dom";
 import {validateForm} from "./validation"
-
+import { login } from "./authService"; 
 
 
 function Login(){
@@ -38,37 +38,11 @@ function Login(){
       return;
     }
     
-
-    const API_URL = process.env.REACT_APP_API_URL 
-
-    console.log("API_URL:", API_URL);
-
-    setError("");
   
     try {
       console.log("sending login request with:", loginData);
-        const response = await fetch(`${API_URL}/auth/login`,{
-          method:"POST",
-          headers: {
-            'Content-Type':'application/json'
-             },
-             body:JSON.stringify({
-
-              email:loginData.email,
-               password:loginData.password
-              })
-        });
-        console.log("login responce status:", response.status)
-       
-        const data = await response.json();
-        console.log("login responce datae:", data);
-
-        if(!response.ok){
+        const data= await login(loginData);
           
-          throw new Error(data.message ||"login failed");
-        }
-        
-       
         localStorage.setItem("username", data.name || "User");
 
                
