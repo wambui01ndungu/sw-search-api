@@ -39,7 +39,7 @@ function Login(){
     
   
     try {
-      console.log("sending login request with:", loginData);
+      
         const data= await login(loginData);
           
         localStorage.setItem("username", data.name || "User");
