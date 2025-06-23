@@ -21,3 +21,22 @@ if (!response.ok){
 }
 return data;
 }
+export async function login(formData) {
+  const response = await fetch(`${BASE_URL}/auth/login`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': "application/json"
+    },
+    credentials: "include",
+    body: JSON.stringify(formData)
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    const message = data.message || "login failed";
+    throw new Error(message);
+  }
+
+  return data;
+}
