@@ -64,6 +64,13 @@ def create_app():
     jwt_ext.decode_token = decode_token_with_multiple_keys(jwt_keys)
      
      #initialize extentions
+    db_url = os.environ.get('DATABASE_URL')
+    if db_url:
+        if not db_url.endswith('?sslmode=require'):
+            db_url += '?sslmode=require'
+        app.config['SQLALCHEMY_DATABASE_URI'] =db_url
+    else:
+        app.config['SQLALCHEMY_DATABASE_URI'] ='sqlite:///local_dev.db'
 
     db.init_app(app)
     migrate = Migrate(app, db)
