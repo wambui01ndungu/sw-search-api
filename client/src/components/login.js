@@ -3,6 +3,8 @@ import React, {useState,}from "react";
 import { useNavigate} from"react-router-dom";
 import {validateForm} from "./validation"
 import { login } from "./authService"; 
+// At the top of login.js
+import { maskSensitiveData } from "./utils";
 
 function Login(){
   const [loginData, setLoginData] = useState({
@@ -39,6 +41,7 @@ function Login(){
     
   
     try {
+        console.log("Submitting login data:", maskSensitiveData(loginData));
       
         const data= await login(loginData);
           

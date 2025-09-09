@@ -1,5 +1,8 @@
+
+
+import { maskSensitiveData } from './utils';
 export const validateForm =(formData) =>{
-  console.log("validateForm received:", formData);
+  console.log("validateForm received:", maskSensitiveData (formData));
 
   if(!formData){
     return{ valid:false, message:"Missing data"}

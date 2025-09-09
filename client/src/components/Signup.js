@@ -6,6 +6,7 @@ import { FaTruckLoading } from "react-icons/fa";
 import { signup } from "./authService";
 
 
+import { maskSensitiveData } from './utils';
 
 function Signup () {
   const navigate = useNavigate();
@@ -47,6 +48,7 @@ const formatName =(name) =>
       email: formData.email.trim().toLowerCase(),
       password: formData.password,
 };
+  console.log("Submitting signup data:", maskSensitiveData(normalizedFormData));
   //validate before sending to server 
   const{valid, message}= validateForm(normalizedFormData);
     if(!valid){
@@ -60,7 +62,7 @@ const formatName =(name) =>
 
     try {
       const data =await signup(normalizedFormData);
-      console.log("signup  sucessfull", data)
+      
 
       localStorage.setItem("user", JSON.stringify(data.email));
       navigate("/login")

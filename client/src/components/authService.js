@@ -2,7 +2,11 @@
 
 import BASE_URL from './config';
 
+import { maskSensitiveData } from './utils';  
+
+
 export async function signup(formData) {
+  console.log("Sending signup data:", maskSensitiveData(formData));
   const response = await fetch(`${BASE_URL}/auth/signup`,{
   method:'POST',
   headers:{
