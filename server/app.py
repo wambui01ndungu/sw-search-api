@@ -52,8 +52,8 @@ def create_app():
 
 
     
-    #JWT condig
-    current_jwt_key = os.environ.get("JWT_SECRET_KEY_CURRENT", "dev_fallback_jwt")
+    #JWT config
+    current_jwt_key = os.environ.get("JWT_SECRET_KEY", "dev_fallback_jwt")
     old_jwt_key = os.environ.get("JWT_OLD_SECRET_KEY")
     app.config['JWT_SECRET_KEYS'] = [k for k in [old_jwt_key, current_jwt_key] if k]
     

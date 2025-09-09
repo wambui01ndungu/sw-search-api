@@ -9,6 +9,8 @@ def get_database_uri():
     if not uri.startswith("postgresql://"):
         print("ERROR: DATABASE_URI must start with 'postgresql://'.", file=sys.stderr)
         sys.exit(1)
+    if "?sslmode=require" not in uri:
+        uri += '?sslmode=require'
     return uri
 
 class Config:
@@ -19,7 +21,7 @@ class Config:
     SECRET_KEY = os.getenv("FLASK_SECRET_KEY", "dev_fallback_flask")
     JWT_SECRET_KEYS = [k for k in[
         os.getenv("JWT_OLD_SECRET_KEY"),
-        os.getenv("JWT_SECRET_KEY_CURRENT", "dev_fallback_jwt")
+        os.getenv("JWT_SECRET_KEY", "dev_fallback_jwt")
     ]if k]
 
 
