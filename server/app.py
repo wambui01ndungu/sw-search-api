@@ -36,7 +36,7 @@ logger.setLevel(logging.INFO)
 
 def create_app():
     app = Flask(__name__)
-      app.url_map.strict_slashes = False
+    app.url_map.strict_slashes = False
 
     env = os.getenv("FLASK_ENV", "development")
     if env == "production":
