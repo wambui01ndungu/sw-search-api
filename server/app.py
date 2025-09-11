@@ -98,10 +98,10 @@ def create_app():
         return {'python_version': sys.version}
 
 
-    @app.before_request
-    def handle_options_request():
-        if request.method =="OPTIONS":
-            return make_response("", 200)
+   # @app.before_request
+    #def handle_options_request():
+     #   if request.method =="OPTIONS":
+      #      return make_response("", 200)
     
     @app.errorhandler(Exception)
     def handle_exception(e):
