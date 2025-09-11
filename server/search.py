@@ -62,7 +62,7 @@ class SearchResource(Resource):
                 return jsonify({
                     "source":"database",
                     "results": parsed_results
-                }),200
+                })
             except Exception as e:
                 logger.error(f"[Search] Failed to parse DB cache for query: '{query}'")
                 log_internal_error(e,"parse_db_cache")
@@ -113,7 +113,7 @@ class SearchResource(Resource):
           return jsonify({
             "source":"swapi",    
             "results":sorted_results
-           }),200
+           })
            
       
       except requests.RequestException as e:
