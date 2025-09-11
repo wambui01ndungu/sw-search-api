@@ -41,10 +41,10 @@ class SearchResource(Resource):
           data,timestamp =cache[query]
           if (current_time - timestamp).total_seconds() < CACHE_DURATION:
               logger.info(f"[Search] Serving result from memory cache for query: '{query}'")
-              return{
+              return jsonify ({
                 "source":"cache",
                 "results":data
-               },200
+               }),200
           else:
               #expired
               del  cache[query]
@@ -59,10 +59,10 @@ class SearchResource(Resource):
                 cache[query]=(parsed_results, db_cache.timestamp)
                 logger.info(f"[Search] Serving result from DB cache for query: '{query}'")
               
-                return{
+                return jsonify({
                     "source":"database",
                     "results": parsed_results
-                },200
+                }),200
             except Exception as e:
                 logger.error(f"[Search] Failed to parse DB cache for query: '{query}'")
                 log_internal_error(e,"parse_db_cache")
@@ -110,7 +110,7 @@ class SearchResource(Resource):
 
         
 
-          return ({
+          return jsonify({
             "source":"swapi",    
             "results":sorted_results
            }),200
