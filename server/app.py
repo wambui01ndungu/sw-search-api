@@ -1,5 +1,7 @@
 import os
 from flask import Flask, jsonify, request, make_response
+
+
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -44,11 +46,12 @@ def create_app():
     bcrypt.init_app(app)
 
     #enable cors for frontend
+
     CORS(app,
-        supports_credentials =True,
-        origins=os.environ.get("FRONTEND_URL", "http://localhost:3000").split(","),
-        allow_headers=["Content-Type", "Authorization"],
-        methods=["GET", "POST",  "OPTIONS"])
+    supports_credentials=True,
+    origins=[o.strip() for o in os.environ.get("FRONTEND_URL", "http://localhost:3000").split(",")],
+    allow_headers=["Content-Type", "Authorization"],
+    methods=["GET", "POST",  "OPTIONS"])
 
 
     
